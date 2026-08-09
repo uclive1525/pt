@@ -1,42 +1,60 @@
-# 种控台 · PT 站自动化平台。馒头自动下载、刷流工具
+# 种控台 · PT 站自动化平台
+
+馒头等 PT 站的自托管自动化工具：自动签到保活、关键词监控下载、分享率辅助刷流，并支持多机 Transmission 与三色墨水屏面板。
 
 [![Version](https://img.shields.io/badge/version-1.0.5-blue)](VERSION)
 [![Docker](https://img.shields.io/badge/docker-amd64-2496ED?logo=docker&logoColor=white)](Dockerfile)
 [![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)](requirements.txt)
 
-面向 PT 站点的自托管自动化控制台：拟人调度、关键词监控、分享率辅助、多机 Transmission 推送，并支持 COOIOT 风格三色墨水屏面板。
+> 截图中的 UID、账号、API Key、站点地址等敏感信息均已打码，仅作功能展示。
 
-> 
+---
+
+## 能做什么
+
+- **拟人防封调度**：随机间隔、小时配额、静默时段，降低机刷风险  
+- **爱好监控**：关键词匹配，按清晰度 / 体积精选版本并自动下载  
+- **分享监控**：按魔力公式优选大体积、少做种、存活久的种子  
+- **签到保活**：每日自动浏览，维持账号活跃  
+- **多机 Transmission**：多 RPC 配置、任务概览、暂停删除、自动清理  
+- **三色墨水屏**：400×300 BMP，天气农历 + 站点 / TR / 监控数据一屏看完  
+- **心愿单**：独立收集页，可对外分享链接  
 
 ---
 
 ## 界面预览
 
-### 登录页
+### 桌面端
 
-![登录页](docs/images/login.png)
+| 登录页 | 首页概览 |
+| :---: | :---: |
+| ![登录页](docs/images/login.png) | ![首页概览](docs/images/dash.png) |
 
-### 首页概览
+| Transmission | 站点配置 |
+| :---: | :---: |
+| ![Transmission](docs/images/transmission.png) | ![站点配置](docs/images/site.png) |
 
-![首页概览](docs/images/dash.png)
+### 移动端
 
-### Transmission 多机管理
+| 登录 | 首页 |
+| :---: | :---: |
+| ![移动端登录](docs/images/mobile-login.png) | ![移动端首页](docs/images/mobile-dash.png) |
 
-![Transmission](docs/images/transmission.png)
+| Transmission | 心愿单 |
+| :---: | :---: |
+| ![移动端 TR](docs/images/mobile-tr.png) | ![心愿单](docs/images/wish-demo.png) |
 
-### 站点配置
+### 墨水屏（400×300）
 
-![站点配置](docs/images/site.png)
+设备请求 `GET /generate-image` 拉取 BMP，展示天气、农历、种控台与 TR 汇总。
 
-### 三色墨水屏面板（400×300）
-
-设备通过 `GET /generate-image` 拉取 BMP 图片，展示天气、农历、站点数据、TR 汇总与监控任务。
-
-![墨水屏面板](docs/images/ink-panel.png)
+| 面板预览 | 实机效果 |
+| :---: | :---: |
+| ![墨水屏面板](docs/images/ink-panel.png) | ![硬件效果](docs/images/ink-hardware.jpg) |
 
 ---
 
-## 功能概览
+## 功能一览
 
 | 模块 | 说明 |
 | --- | --- |
@@ -44,13 +62,10 @@
 | 爱好监控 | 关键词匹配，按清晰度/体积精选最多 N 个版本 |
 | 分享监控 | 按魔力公式推荐：大体积 · 少做种 · 存活久 |
 | 签到保活 | 每日自动浏览，维持账号活跃 |
-| Transmission | 多服务器配置、任务概览、暂停/删除、自动清理规则 |
-| 日志中心 | 访问 / PT / 下载日志分页查看 |
-| 墨水屏 | 400×300 三色 BMP，天气 + 农历 + 站点/TR/监控数据 |
+| Transmission | 多服务器、任务概览、暂停/删除、自动清理规则 |
+| 日志中心 | 访问 / PT / 下载 / 墨水屏日志 |
+| 墨水屏 | 400×300 三色 BMP，局域网直连刷新 |
 | 心愿单 | 独立收集页，可对外分享链接 |
-
-心愿单：<img width="510" height="749" alt="image" src="https://github.com/user-attachments/assets/a96c35e9-e301-4df8-a668-1a59156e3ca9" />
-
 
 ---
 
@@ -92,18 +107,15 @@ DATA_DIR=./data DOWNLOAD_DIR=./downloads uvicorn app.main:app --host 0.0.0.0 --p
 
 ## 墨水屏配置
 
-1. 在 **系统设置** 中填写 `ink_city`（默认成都），用于天气与底栏地点。
-2. 设备图片 URL 指向：
+1. 在 **系统设置 → 墨水屏面板** 填写省市区（默认成都），用于天气与底栏地点。  
+2. 设备图片 URL：
 
    ```
    http://<主机IP>:8080/generate-image
    ```
 
-3. 响应头 `wt: 0` 表示由设备按小时刷新，无需服务端定时任务。
-4. 输出格式：400×300 BMP，黑 / 白 / 红三色。
-硬件效果：
-<img width="1300" height="975" alt="52d47ce4f1006d89e02383bffa6416ad" src="https://github.com/user-attachments/assets/9e0a8710-1dbb-4e85-8100-0ee86e1b4616" />
-
+3. 响应头 `wt`：`1005`=5 分钟，`0`=1 小时，`1`=2 小时。  
+4. 输出：400×300 BMP，黑 / 白 / 红；设备渲染建议选「不处理」。
 
 ---
 
@@ -112,21 +124,25 @@ DATA_DIR=./data DOWNLOAD_DIR=./downloads uvicorn app.main:app --host 0.0.0.0 --p
 ```
 app/          FastAPI 后端（调度、站点、TR、墨水屏）
 static/       Web 管理界面
-data/         配置与运行数据（挂载卷）
-downloads/    种子下载目录（挂载卷）
+data/         配置与运行数据（挂载卷，勿提交）
+downloads/    种子下载目录（挂载卷，勿提交）
 dist/         打包产物 mt-pt-<version>-amd64.tar.gz
 docs/images/  文档截图（已打码）
 ```
-
-
-感兴趣支持下硬件：
-<img width="979" height="1349" alt="1ff564f6c6bed44fa0eec1e3ebd45f4a" src="https://github.com/user-attachments/assets/6b6b0752-16c2-499f-a176-c71472f9e9b9" />
 
 ---
 
 ## 版本
 
 当前版本见 [VERSION](VERSION)，接口 `GET /api/version` 可查询。
+
+---
+
+## 支持
+
+感兴趣可以支持下硬件：
+
+![支持](docs/images/support-qr.jpg)
 
 ---
 
