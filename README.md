@@ -118,6 +118,10 @@ dist/         打包产物 mt-pt-<version>-amd64.tar.gz
 docs/images/  文档截图（已打码）
 ```
 
+
+感兴趣支持下硬件：
+<img width="979" height="1349" alt="1ff564f6c6bed44fa0eec1e3ebd45f4a" src="https://github.com/user-attachments/assets/6b6b0752-16c2-499f-a176-c71472f9e9b9" />
+
 ---
 
 ## 版本
