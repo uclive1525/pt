@@ -1,4 +1,4 @@
-# 种控台 · PT 站自动化平台
+# 种控台 · PT 站自动化平台。馒头自动下载、刷流工具
 
 [![Version](https://img.shields.io/badge/version-1.0.5-blue)](VERSION)
 [![Docker](https://img.shields.io/badge/docker-amd64-2496ED?logo=docker&logoColor=white)](Dockerfile)
@@ -6,7 +6,7 @@
 
 面向 PT 站点的自托管自动化控制台：拟人调度、关键词监控、分享率辅助、多机 Transmission 推送，并支持 COOIOT 风格三色墨水屏面板。
 
-> 截图中的 UID、账号、API Key、站点地址等敏感信息均已打码，仅作功能展示。
+> 
 
 ---
 
