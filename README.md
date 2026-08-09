@@ -49,6 +49,9 @@
 | 墨水屏 | 400×300 三色 BMP，天气 + 农历 + 站点/TR/监控数据 |
 | 心愿单 | 独立收集页，可对外分享链接 |
 
+心愿单：<img width="510" height="749" alt="image" src="https://github.com/user-attachments/assets/a96c35e9-e301-4df8-a668-1a59156e3ca9" />
+
+
 ---
 
 ## 快速开始
@@ -98,6 +101,9 @@ DATA_DIR=./data DOWNLOAD_DIR=./downloads uvicorn app.main:app --host 0.0.0.0 --p
 
 3. 响应头 `wt: 0` 表示由设备按小时刷新，无需服务端定时任务。
 4. 输出格式：400×300 BMP，黑 / 白 / 红三色。
+硬件效果：
+<img width="1300" height="975" alt="52d47ce4f1006d89e02383bffa6416ad" src="https://github.com/user-attachments/assets/9e0a8710-1dbb-4e85-8100-0ee86e1b4616" />
+
 
 ---
 
