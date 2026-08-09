@@ -1,0 +1,35 @@
+# 运行时数据与用户配置（含账号/密钥/日志）
+/data/**
+!/data/.gitkeep
+/downloads/**
+!/downloads/.gitkeep
+
+# 构建产物
+/dist/
+*.tar
+*.tar.gz
+
+# 环境与密钥
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets.*
+
+# Python / 系统杂项
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.DS_Store
+.idea/
+.vscode/
+*.log
+*.swp
+*~
+
+# 本地字体缓存（镜像构建时由 Dockerfile 安装）
+/fonts/

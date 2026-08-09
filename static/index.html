@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <title>种控台 · PT 站自动化平台</title>
+  <link rel="stylesheet" href="/static/style.css?v=39" />
+  <script>
+    (function () {
+      var ua = navigator.userAgent || "";
+      var phone = /Android|iPhone|iPod|Mobile|OpenHarmony|HarmonyOS|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+      var narrow = Math.min(screen.width || 9999, window.innerWidth || 9999) <= 900;
+      document.documentElement.dataset.device = phone || narrow ? "mobile" : "pc";
+    })();
+  </script>
+</head>
+<body>
+  <div id="loginView" class="login-page">
+    <div class="login-shell">
+      <aside class="login-showcase">
+        <div class="login-brand">
+          <div class="mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L19 21l-7-4.5L5 21l2.5-7.5L2 9h7z"/></svg>
+          </div>
+          <div>
+            <b>种控台</b>
+            <span>PT 站自动化平台</span>
+          </div>
+        </div>
+        <h1>把刷站、保活、推种<br>交给一套节奏</h1>
+        <p class="login-lead">拟人防封调度 · 关键词精选下载 · 分享率辅助 · 多机 Transmission · 墨水屏面板</p>
+        <ul class="login-feats">
+          <li>
+            <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M4.6 6.1l2.1 2.1M17.3 15.8l2.1 2.1M3 12h3M18 12h3M4.6 17.9l2.1-2.1M17.3 8.2l2.1-2.1"/><circle cx="12" cy="12" r="3"/></svg></span>
+            <div><b>拟人防封</b><span>随机间隔、小时配额、静默时段，降低机刷风险</span></div>
+          </li>
+          <li>
+            <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z"/></svg></span>
+            <div><b>爱好监控</b><span>关键词匹配，按清晰度/体积精选最多 3 个版本</span></div>
+          </li>
+          <li>
+            <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5"/></svg></span>
+            <div><b>分享监控</b><span>按魔力公式推荐：大体积 · 少做种 · 存活久</span></div>
+          </li>
+          <li>
+            <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></span>
+            <div><b>签到保活 + TR 推送</b><span>每日保活浏览，种子直推多台 Transmission</span></div>
+          </li>
+          <li>
+            <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h4M7 13h6M14 9h3"/></svg></span>
+            <div><b>墨水屏面板</b><span>天气电量、种控台与 TR 汇总直出三色屏，局域网即连</span></div>
+          </li>
+        </ul>
+      </aside>
+      <form class="login-card" id="loginForm" autocomplete="off">
+        <div class="brand login-card-brand">
+          <div class="mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L19 21l-7-4.5L5 21l2.5-7.5L2 9h7z"/></svg>
+          </div>
+          <div>
+            <b>种控台</b>
+            <span>PT 站自动化平台</span>
+          </div>
+        </div>
+        <h2>欢迎登录</h2>
+        <p class="sub">请输入系统账号与密码</p>
+        <div id="loginErr" class="err"></div>
+        <div class="field">
+          <label>账号</label>
+          <div class="input">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 10-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+            <input id="sysUser" type="text" placeholder="请输入账号" required />
+          </div>
+        </div>
+        <div class="field">
+          <label>密码</label>
+          <div class="input">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 118 0v3"/></svg>
+            <input id="sysPass" type="password" placeholder="请输入密码" required />
+          </div>
+        </div>
+        <button class="btn-login" type="submit">登 录</button>
+        <p class="tip">登录后可配置站点、调度与推送</p>
+      </form>
+    </div>
+  </div>
+
+  <div id="appView" class="admin-shell" hidden>
+    <div class="nav-mask" id="navMask" hidden></div>
+    <aside class="admin-aside" id="adminAside">
+      <div class="admin-brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L19 21l-7-4.5L5 21l2.5-7.5L2 9h7z"/></svg>
+        </div>
+        <div class="brand-text">种控台<span>PT 站自动化平台</span></div>
+        <button type="button" class="aside-close" id="btnAsideClose" aria-label="关闭菜单">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <nav class="nav">
+        <div class="nav-sub open has-active" data-group="overview">
+          <button type="button" class="nav-sub-title" data-toggle="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>工作台</button>
+          <div class="nav-sub-body">
+            <button class="nav-item active" data-page="dash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1v-9.5z"/></svg>首页概览</button>
+          </div>
+        </div>
+        <div class="nav-sub open" data-group="site">
+          <button type="button" class="nav-sub-title" data-toggle="site"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>站点管理</button>
+          <div class="nav-sub-body">
+            <button class="nav-item" data-page="site"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4z"/></svg>站点配置</button>
+            <button class="nav-item" data-page="human"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M4.6 6.1l2.1 2.1M17.3 15.8l2.1 2.1M3 12h3M18 12h3M4.6 17.9l2.1-2.1M17.3 8.2l2.1-2.1"/><circle cx="12" cy="12" r="3"/></svg>拟人防封</button>
+            <button class="nav-item" data-page="tr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17l6-6 4 4 6-8"/><path d="M4 21h16"/></svg>Transmission</button>
+          </div>
+        </div>
+        <div class="nav-sub open" data-group="task">
+          <button type="button" class="nav-sub-title" data-toggle="task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></svg>任务中心</button>
+          <div class="nav-sub-body">
+            <button class="nav-item" data-page="tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>监控任务</button>
+            <button class="nav-item" data-page="hobby"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z"/></svg>爱好监控</button>
+            <button class="nav-item" data-page="ratio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5"/></svg>分享监控</button>
+          </div>
+        </div>
+        <div class="nav-sub open" data-group="log">
+          <button type="button" class="nav-sub-title" data-toggle="log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 4h9a2 2 0 012 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 012-2z"/><path d="M10 9h6M10 13h6"/></svg>日志中心</button>
+          <div class="nav-sub-body">
+            <button class="nav-item" data-page="access"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>访问日志</button>
+            <button class="nav-item" data-page="ptlog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h7"/></svg>PT日志</button>
+            <button class="nav-item" data-page="download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>下载日志</button>
+            <button class="nav-item" data-page="inklog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 9h8M8 13h5"/></svg>墨水屏日志</button>
+          </div>
+        </div>
+        <div class="nav-sub open" data-group="system">
+          <button type="button" class="nav-sub-title" data-toggle="system"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3h.1a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8v.1a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>系统管理</button>
+          <div class="nav-sub-body">
+            <button class="nav-item" data-page="sys"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3h.1a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8v.1a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>系统设置</button>
+          </div>
+        </div>
+      </nav>
+      <button type="button" class="admin-logout" id="btnLogout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>退出登录</button>
+    </aside>
+    <div class="admin-body">
+      <header class="admin-top">
+        <button type="button" class="m-menu-btn" id="btnMenu" aria-label="菜单">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <div class="admin-top-title" id="pageTitle">工作台</div>
+        <div class="admin-top-meta">
+          <i class="dot"></i>
+          <span id="topUser">admin</span>
+          <span class="badge badge-info" id="runBadge">已停止</span>
+        </div>
+      </header>
+      <main class="admin-main">
+        <section class="page active" id="page-dash">
+          <div class="page-inner">
+            <div class="hero-tech">
+              <div>
+                <div class="pulse"><i></i> 实时监控</div>
+                <h3>PT 自动化控制台</h3>
+                <p>拟人节奏扫描 · 关键词下载 · 分享率辅助</p>
+                <div class="hero-metrics">
+                  <div class="hero-metric"><b id="kpiKw">0</b><span>关键词</span></div>
+                  <div class="hero-metric"><b id="kpiAct">0</b><span>近1小时操作</span></div>
+                  <div class="hero-metric"><b id="kpiNext">-</b><span>下次执行</span></div>
+                </div>
+              </div>
+              <div class="hero-panel">
+                <div class="row"><span>调度状态</span><b id="kpiRun">停止</b></div>
+                <div class="row"><span>拟人模式</span><b id="kpiHuman">-</b></div>
+                <div class="row"><span>API Key</span><b id="kpiKey">-</b></div>
+                <div class="row"><span>静默时段</span><b id="kpiQuiet">否</b></div>
+              </div>
+            </div>
+            <div class="toolbar">
+              <div>
+                <button class="btn btn-primary" id="btnStart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 5v14l11-7z"/></svg>启动调度</button>
+                <button class="btn" id="btnStop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>停止</button>
+                <button class="btn" id="btnScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 3v6h-6"/></svg>立即扫描</button>
+                <button class="btn" id="btnRefreshPersonal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12a8 8 0 11-2.3-5.5"/><path d="M20 4v5h-5"/></svg>刷新个人数据</button>
+              </div>
+              <span class="muted" id="dashHint"></span>
+            </div>
+            <div class="personal-user">
+              <div class="personal-user-main">
+                <div class="personal-avatar" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 10-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div class="meta">
+                  <b id="pUsername">-</b>
+                  <span class="muted" id="pUid"></span>
+                </div>
+              </div>
+              <span class="muted" id="pSynced">尚未同步</span>
+            </div>
+            <div class="metric-board personal-board">
+              <div class="metric-tile tone-amber">
+                <div class="metric-k">魔力值</div>
+                <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.2 6.6H21l-5.4 4 2.1 6.4L12 16.8 6.3 20l2.1-6.4L3 9.6h6.8z"/></svg></div>
+                <div class="metric-v" id="pBonus">-</div>
+                <div class="metric-h">已使用</div>
+              </div>
+              <div class="metric-tile tone-slate">
+                <div class="metric-k">邀请</div>
+                <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></div>
+                <div class="metric-v" id="pInvite">-</div>
+                <div class="metric-h">已用 / 限额</div>
+              </div>
+              <div class="metric-tile tone-blue focus">
+                <div class="metric-k">分享率</div>
+                <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5"/></svg></div>
+                <div class="metric-v" id="pRatio">-</div>
+                <div class="metric-h">Share Ratio</div>
+              </div>
+              <div class="metric-tile tone-green">
+                <div class="metric-k">上传量</div>
+                <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div>
+                <div class="metric-v" id="pUp">-</div>
+                <div class="metric-h">Uploaded</div>
+              </div>
+              <div class="metric-tile tone-rose">
+                <div class="metric-k">下载量</div>
+                <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div>
+                <div class="metric-v" id="pDown">-</div>
+                <div class="metric-h">Downloaded</div>
+              </div>
+              <div class="metric-tile tone-cyan">
+                <div class="metric-k">当前活动</div>
+                <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+                <div class="metric-v" id="pActive">-</div>
+                <div class="metric-h">做种 / 下载</div>
+              </div>
+            </div>
+            <div class="metric-board ops-board">
+              <div class="metric-tile tone-blue">
+                <div class="metric-k">爱好监控</div>
+                <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z"/></svg></div>
+                <div class="metric-v" id="dKw">0</div>
+                <div class="metric-h">关键词规则</div>
+              </div>
+              <div class="metric-tile tone-cyan">
+                <div class="metric-k">监控任务</div>
+                <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg></div>
+                <div class="metric-v" id="dTasks">0</div>
+                <div class="metric-h">已匹配种子</div>
+              </div>
+              <div class="metric-tile tone-warn">
+                <div class="metric-k">小时配额</div>
+                <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+                <div class="metric-v" id="dQuota">0/40</div>
+                <div class="metric-h">防封限流</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-hd">本系统数据</div>
+              <div class="sys-grid" id="pSysGrid"></div>
+            </div>
+            <div class="card">
+              <div class="card-hd">趋势分析</div>
+              <div class="charts">
+                <div class="chart-box">
+                  <div class="chart-label">分享率走势</div>
+                  <svg id="chartRatio" viewBox="0 0 320 120" preserveAspectRatio="none"></svg>
+                </div>
+                <div class="chart-box">
+                  <div class="chart-label">上传 / 下载 (GB)</div>
+                  <svg id="chartTraffic" viewBox="0 0 320 120" preserveAspectRatio="none"></svg>
+                </div>
+              </div>
+              <div class="list-panel" style="margin-top:10px;overflow:auto">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>时间</th><th>分享率</th><th>上传</th><th>下载</th>
+                      <th>魔力</th><th>活动</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pHistoryBody"><tr><td colspan="6" class="muted">暂无历史</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" id="page-site">
+          <div class="page-inner">
+            <div class="page-head"><div><h2>站点配置</h2><p>请使用 API Key（官方要求，禁止第三方账号密码登录）</p></div></div>
+            <details class="cfg-fold">
+              <summary class="cfg-fold-hd">API Key / 站点连接</summary>
+              <div class="cfg-fold-body">
+<div class="note">请粘贴【控制台 → 实验室 → 存取令牌】的完整 Access Token（不是登录密码）。当前配置中的旧 Key 若被站点返回 key無效，请重新生成后粘贴并点「测试连接」。</div>
+              <div class="form-grid">
+                <div class="form-item full">
+                  <label>API Key <span id="apiKeyStatus" class="muted"></span></label>
+                  <input id="apiKey" type="text" autocomplete="off" spellcheck="false" placeholder="在此粘贴完整令牌" />
+                </div>
+                <div class="form-item"><label>API Base</label><input id="apiBase" /></div>
+                <div class="form-item"><label>Web Base</label><input id="webBase" /></div>
+                <div class="form-item full"><label>代理（可选）</label><input id="proxy" placeholder="http://host:port" /></div>
+                <div class="form-item"><label>浏览模式</label>
+                  <select id="mode"><option value="movie">movie</option><option value="tvshow">tvshow</option><option value="normal">normal</option><option value="adult">adult</option><option value="all">all</option></select>
+                </div>
+                <div class="form-item"><label>页大小</label><input id="pageSize" type="number" min="1" max="100" /></div>
+                <div class="form-item"><label>client version</label><input id="clientVersion" /></div>
+                <div class="form-item"><label>web version</label><input id="webVersion" /></div>
+              </div>
+              <div class="form-actions">
+                <button class="btn btn-primary" id="btnSaveSite">保存</button>
+                <button class="btn" id="btnTestSite">测试连接</button>
+                <button class="btn btn-danger" id="btnClearKey">清除 Key</button>
+                <span class="muted" id="siteTestHint"></span>
+              </div>
+              </div>
+            </details>
+            <details class="cfg-fold">
+              <summary class="cfg-fold-hd">自动签到 / 保活</summary>
+              <div class="cfg-fold-body">
+              <div class="note">每天在设定时间段内随机执行一次：更新浏览时间、随机翻看种子列表、同步个人资料，降低长期未登录被封风险。不下载种子。</div>
+              <div class="form-grid">
+                <div class="form-item"><label>启用自动签到</label>
+                  <select id="checkinEnabled"><option value="1">开启</option><option value="0">关闭</option></select>
+                </div>
+                <div class="form-item"><label>每日时间段开始</label><input id="checkinStart" placeholder="09:00" /></div>
+                <div class="form-item"><label>每日时间段结束</label><input id="checkinEnd" placeholder="12:00" /></div>
+                <div class="form-item"><label>最少浏览次数</label><input id="checkinMinAct" type="number" min="1" max="10" /></div>
+                <div class="form-item"><label>最多浏览次数</label><input id="checkinMaxAct" type="number" min="1" max="10" /></div>
+                <div class="form-item full"><label>状态</label>
+                  <div class="muted" id="checkinStatus">尚未配置</div>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button class="btn btn-primary" id="btnSaveCheckin">保存签到设置</button>
+                <button class="btn" id="btnRunCheckin">立即签到一次</button>
+                <span class="muted" id="checkinHint"></span>
+              </div>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <section class="page" id="page-human">
+          <div class="page-inner">
+            <div class="page-head"><div><h2>拟人防封</h2><p>随机间隔与操作节流，降低未登录/机刷封禁风险</p></div></div>
+            <details class="cfg-fold">
+              <summary class="cfg-fold-hd">拟人防封策略</summary>
+              <div class="cfg-fold-body">
+<div class="form-grid">
+                <div class="form-item"><label>调度间隔最小(秒)</label><input id="intervalMin" type="number" /></div>
+                <div class="form-item"><label>调度间隔最大(秒)</label><input id="intervalMax" type="number" /></div>
+                <div class="form-item"><label>动作延迟最小(秒)</label><input id="actDelayMin" type="number" step="0.1" /></div>
+                <div class="form-item"><label>动作延迟最大(秒)</label><input id="actDelayMax" type="number" step="0.1" /></div>
+                <div class="form-item"><label>翻页延迟最小(秒)</label><input id="pageDelayMin" type="number" step="0.1" /></div>
+                <div class="form-item"><label>翻页延迟最大(秒)</label><input id="pageDelayMax" type="number" step="0.1" /></div>
+                <div class="form-item"><label>每小时最大操作数</label><input id="maxPerHour" type="number" /></div>
+                <div class="form-item"><label>UA 轮换</label>
+                  <select id="uaRotate"><option value="1">开启</option><option value="0">关闭</option></select>
+                </div>
+                <div class="form-item"><label>静默开始 HH:MM</label><input id="quietStart" placeholder="02:00" /></div>
+                <div class="form-item"><label>静默结束 HH:MM</label><input id="quietEnd" placeholder="06:00" /></div>
+                <div class="form-item"><label>拟人模式</label>
+                  <select id="humanMode"><option value="1">开启</option><option value="0">关闭</option></select>
+                </div>
+              </div>
+              <div class="note">请求之间插入随机等待，调度时间叠加抖动；静默时段内跳过扫描，避免深夜异常活跃。</div>
+              <div class="form-actions"><button class="btn btn-primary" id="btnSaveHuman">保存防封策略</button></div>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <section class="page" id="page-tr">
+          <div class="page-inner">
+            <div class="page-head">
+              <div><h2>Transmission</h2><p>可配置多个服务，下载时选择目标</p></div>
+              <button class="btn btn-primary" id="btnAddTr">添加服务</button>
+            </div>
+            <details class="cfg-fold">
+              <summary class="cfg-fold-hd">推送全局设置</summary>
+              <div class="cfg-fold-body">
+<div class="note">Docker 内访问宿主机请填 http://host.docker.internal:9091 。需开启 Web/RPC。</div>
+              <div class="form-grid">
+                <div class="form-item"><label>自动推送默认服务</label><select id="trAutoServer"></select></div>
+                <div class="form-item"><label>手动选择默认服务</label><select id="trDefaultServer"></select></div>
+                <div class="form-item"><label>爱好监控自动推送</label>
+                  <select id="trAutoHobby"><option value="1">是</option><option value="0">否</option></select>
+                </div>
+                <div class="form-item"><label>分享监控自动推送</label>
+                  <select id="trAutoRatio"><option value="1">是</option><option value="0">否</option></select>
+                </div>
+                <div class="form-item"><label>手动下载自动推送</label>
+                  <select id="trAutoManual"><option value="1">是</option><option value="0">否</option></select>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button class="btn btn-primary" id="btnSaveTr">保存全局设置</button>
+              </div>
+              </div>
+            </details>
+            <details class="cfg-fold">
+              <summary class="cfg-fold-hd">任务自动清理</summary>
+              <div class="cfg-fold-body">
+              <div class="note">命中任一启用规则即删除（多服务全覆盖）。可先预演再执行。<br>
+                <b>分享率</b>：任务分享率 ≥「最低分享率」时清理（如设 1.0，达到 1.0 即删）。<br>
+                <b>做种天数</b>：下载完成后累计做种满设定天数清理。<br>
+                <b>空闲天数</b>：已完成且无上传、无活动满设定天数清理。<br>
+                <b>异常任务</b>：Transmission 标记为错误的任务清理。<br>
+                <b>做种数上限</b>：单服务做种数超过上限时，优先清分享率/做种时长较低的。
+              </div>
+              <div class="form-grid">
+                <div class="form-item"><label>启用自动清理</label>
+                  <select id="trManageEnabled"><option value="0">否</option><option value="1">是</option></select>
+                </div>
+                <div class="form-item"><label>检查间隔(分钟)</label><input id="trManageInterval" type="number" min="5" /></div>
+                <div class="form-item"><label>同时删除本地文件</label>
+                  <select id="trManageDeleteData"><option value="1">是</option><option value="0">否</option></select>
+                </div>
+                <div class="form-item"><label title="开启后仅清理已下载完成的任务">仅处理已完成</label>
+                  <select id="trManageOnlyFinished"><option value="1">是</option><option value="0">否</option></select>
+                </div>
+                <div class="form-item"><label title="分享率达到阈值则清理">规则·分享率</label>
+                  <select id="trManageRuleRatio"><option value="1">开</option><option value="0">关</option></select>
+                </div>
+                <div class="form-item"><label title="达到该分享率即命中清理">最低分享率</label><input id="trManageMinRatio" type="number" step="0.1" min="0" /></div>
+                <div class="form-item"><label title="做种累计天数达到阈值则清理">规则·做种天数</label>
+                  <select id="trManageRuleSeedDays"><option value="1">开</option><option value="0">关</option></select>
+                </div>
+                <div class="form-item"><label title="完成下载后做种满多少天清理">做种满(天)</label><input id="trManageSeedDays" type="number" step="0.5" min="0.1" /></div>
+                <div class="form-item"><label title="无上传且无活动天数达到阈值则清理">规则·空闲天数</label>
+                  <select id="trManageRuleIdleDays"><option value="0">关</option><option value="1">开</option></select>
+                </div>
+                <div class="form-item"><label title="空闲满多少天清理">空闲满(天)</label><input id="trManageIdleDays" type="number" step="0.5" min="0.1" /></div>
+                <div class="form-item"><label title="TR 报错任务直接清理">规则·异常任务</label>
+                  <select id="trManageRuleError"><option value="0">关</option><option value="1">开</option></select>
+                </div>
+                <div class="form-item"><label title="做种数超上限时淘汰偏低任务">规则·做种数上限</label>
+                  <select id="trManageRuleMaxSeed"><option value="0">关</option><option value="1">开</option></select>
+                </div>
+                <div class="form-item"><label title="每个 TR 服务最多保留的做种数">每服务最多做种</label><input id="trManageMaxSeed" type="number" min="1" /></div>
+                <div class="form-item full"><label>调度状态</label>
+                  <div class="muted" id="trManageStatus">尚未配置</div>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button class="btn btn-primary" id="btnSaveTrManage">保存清理规则</button>
+                <button class="btn" id="btnTrManageDry">预演</button>
+                <button class="btn" id="btnTrManageRun">立即执行</button>
+                <span class="muted" id="trManageHint"></span>
+              </div>
+              </div>
+            </details>
+            <div class="tr-list" id="trServerList"></div>
+            <div class="card tr-overview">
+              <div class="card-hd">下载概况 <span class="muted" id="trViewScope" style="font-weight:500;margin-left:6px"></span></div>
+              <div class="tr-server-tabs" id="trServerTabs"></div>
+              <div class="toolbar" style="margin-top:8px">
+                <div>
+                  <button class="btn" id="btnRefreshTrView">刷新</button>
+                </div>
+                <span class="muted" id="trViewHint"></span>
+              </div>
+              <div class="tr-speed-hero">
+                <div class="tr-speed down">
+                  <div class="tr-speed-top">
+                    <span class="tr-speed-k">下载速度</span>
+                    <span class="tr-speed-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg></span>
+                  </div>
+                  <b id="trStatRateDown">0</b>
+                </div>
+                <div class="tr-speed up">
+                  <div class="tr-speed-top">
+                    <span class="tr-speed-k">上传速度</span>
+                    <span class="tr-speed-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>
+                  </div>
+                  <b id="trStatRateUp">0</b>
+                </div>
+                <div class="tr-speed ratio">
+                  <div class="tr-speed-top">
+                    <span class="tr-speed-k">分享率</span>
+                    <span class="tr-speed-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5"/></svg></span>
+                  </div>
+                  <b id="trStatRatioVal">-</b>
+                  <span class="tr-speed-h" id="trStatRatio">累计流量</span>
+                </div>
+              </div>
+              <div class="metric-board tr-board" id="trStatRow">
+                <div class="metric-tile tone-slate">
+                  <div class="metric-k">任务</div>
+                  <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg></div>
+                  <div class="metric-v" id="trStatTotal">0</div>
+                </div>
+                <div class="metric-tile tone-blue">
+                  <div class="metric-k">下载中</div>
+                  <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div>
+                  <div class="metric-v" id="trStatDown">0</div>
+                </div>
+                <div class="metric-tile tone-green">
+                  <div class="metric-k">做种中</div>
+                  <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5"/></svg></div>
+                  <div class="metric-v" id="trStatSeed">0</div>
+                </div>
+                <div class="metric-tile tone-warn">
+                  <div class="metric-k">已暂停</div>
+                  <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="1"/></svg></div>
+                  <div class="metric-v" id="trStatPaused">0</div>
+                </div>
+                <div class="metric-tile tone-cyan">
+                  <div class="metric-k">总量</div>
+                  <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.7l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.7l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
+                  <div class="metric-v" id="trStatSize">-</div>
+                </div>
+                <div class="metric-tile tone-rose">
+                  <div class="metric-k">已下载</div>
+                  <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div>
+                  <div class="metric-v" id="trStatDownloaded">-</div>
+                </div>
+                <div class="metric-tile tone-green">
+                  <div class="metric-k">已上传</div>
+                  <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div>
+                  <div class="metric-v" id="trStatUploaded">-</div>
+                </div>
+                <div class="metric-tile tone-cyan">
+                  <div class="metric-k">剩余空间</div>
+                  <div class="metric-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2"/></svg></div>
+                  <div class="metric-v" id="trStatFree">-</div>
+                </div>
+              </div>
+              <div class="list-panel" id="trServerStatPanel" style="margin-top:10px"></div>
+            </div>
+            <div class="card" style="margin-top:10px">
+              <div class="card-hd">任务列表</div>
+              <div class="toolbar">
+                <div>
+                  <select id="trStatusFilter" style="height:32px">
+                    <option value="all">全部状态</option>
+                    <option value="downloading">下载中</option>
+                    <option value="seeding">做种中</option>
+                    <option value="paused">已暂停</option>
+                    <option value="error">异常</option>
+                    <option value="done">已完成</option>
+                  </select>
+                </div>
+                <span class="muted" id="trListHint"></span>
+              </div>
+              <div class="list-panel" style="margin-top:8px;overflow:auto">
+                <table class="data-table" id="trTorrentTable">
+                  <thead>
+                    <tr>
+                      <th class="col-title">名称</th>
+                      <th class="tr-col-server">设备名</th>
+                      <th class="th-status">状态</th>
+                      <th class="th-progress">进度</th>
+                      <th class="th-num">大小</th>
+                      <th class="th-num" title="下载速度">↓速</th>
+                      <th class="th-num" title="上传速度">↑速</th>
+                      <th class="th-num" title="分享率">比率</th>
+                      <th class="th-num" title="连接数">连接</th>
+                      <th class="th-ops">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="trTorrentBody">
+                    <tr><td colspan="10" class="muted">点击刷新加载 Transmission 任务</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div id="trPicker" class="modal" hidden>
+          <div class="modal-card">
+            <h3>选择 Transmission</h3>
+            <select id="trPickerSelect"></select>
+            <div class="form-actions">
+              <button class="btn btn-primary" id="trPickerOk">确定</button>
+              <button class="btn" id="trPickerCancel">取消</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="trEditor" class="modal" hidden>
+          <div class="modal-card">
+            <h3 id="trEditorTitle">编辑服务</h3>
+            <input type="hidden" id="trEditId" />
+            <div class="form-grid">
+              <div class="form-item"><label>名称</label><input id="trEditName" placeholder="家里 NAS" /></div>
+              <div class="form-item"><label>启用</label>
+                <select id="trEditEnabled"><option value="1">是</option><option value="0">否</option></select>
+              </div>
+              <div class="form-item full"><label>RPC 地址</label><input id="trEditUrl" placeholder="http://host.docker.internal:9091" /></div>
+              <div class="form-item"><label>用户名</label><input id="trEditUser" autocomplete="off" /></div>
+              <div class="form-item"><label>密码</label><input id="trEditPass" type="password" autocomplete="off" placeholder="留空不改" /></div>
+              <div class="form-item full"><label>下载目录（可选）</label><input id="trEditDir" placeholder="/downloads" /></div>
+              <div class="form-item"><label>添加后暂停</label>
+                <select id="trEditPaused"><option value="0">否</option><option value="1">是</option></select>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" id="trEditSave">保存</button>
+              <button class="btn" id="trEditTest">测试</button>
+              <button class="btn" id="trEditCancel">取消</button>
+            </div>
+            <span class="muted" id="trEditHint"></span>
+          </div>
+        </div>
+
+        <section class="page" id="page-tasks">
+          <div class="page-inner">
+            <div class="page-head">
+              <div><h2>监控任务</h2><p>爱好监控匹配并下载的 PT 种子列表</p></div>
+              <div>
+                <button class="btn" id="btnRefreshTasks">刷新</button>
+                <button class="btn" id="btnEnrichTasks">补全详情</button>
+                <button class="btn" id="btnScanTasks">立即扫描</button>
+              </div>
+            </div>
+            <div class="toolbar">
+              <div>
+                <select id="taskStatusFilter">
+                  <option value="all">全部状态</option>
+                  <option value="downloaded">已下载</option>
+                  <option value="matched">已匹配</option>
+                  <option value="pending">待下载</option>
+                  <option value="failed">失败</option>
+                </select>
+              </div>
+              <span class="muted" id="taskCountHint"></span>
+            </div>
+            <div class="task-list" id="taskBody"></div>
+          </div>
+        </section>
+
+        <section class="page" id="page-hobby">
+          <div class="page-inner">
+            <div class="page-head"><div><h2>爱好监控</h2><p>按关键词匹配；每词只保留清晰度/体积最优的最多 3 个版本</p></div></div>
+            <details class="cfg-fold">
+              <summary class="cfg-fold-hd">爱好监控规则</summary>
+              <div class="cfg-fold-body">
+<div class="form-grid">
+                <div class="form-item full"><label>关键词（逗号分隔）</label><input id="keywords" placeholder="阿凡达,Dune,流浪地球" /></div>
+                <div class="form-item full"><label>排除词（逗号分隔）</label><input id="excludeKw" placeholder="Cam,TS" /></div>
+                <div class="form-item"><label>匹配方式</label>
+                  <select id="kwMatch"><option value="any">任意命中</option><option value="all">全部命中</option></select>
+                </div>
+                <div class="form-item"><label>自动下载</label>
+                  <select id="autoDl"><option value="1">开启</option><option value="0">关闭</option></select>
+                </div>
+                <div class="form-item"><label>每词最多版本</label><input id="hobbyMaxVer" type="number" min="1" max="10" /></div>
+              </div>
+              <div class="note">优先 4K/1080p、Remux/BluRay 与更大体积；同关键词最多下载设定数量，避免全量拉取。</div>
+              <div class="form-actions">
+                <button class="btn btn-primary" id="btnSaveHobby">保存监控规则</button>
+                <button class="btn" id="btnScanHobby">立即扫描</button>
+              </div>
+              </div>
+            </details>
+
+            <details class="cfg-fold">
+              <summary class="cfg-fold-hd">兴趣收集分享页</summary>
+              <div class="cfg-fold-body">
+              <div class="form-grid">
+                <div class="form-item"><label>启用收集页</label>
+                  <select id="wishEnabled"><option value="0">关闭</option><option value="1">开启</option></select>
+                </div>
+                <div class="form-item"><label>页面标题</label><input id="wishTitle" placeholder="想看什么？" /></div>
+                <div class="form-item full"><label>页面说明</label><input id="wishIntro" placeholder="留下片名或关键词…" /></div>
+                <div class="form-item full"><label>分享链接</label>
+                  <div class="wish-link-row">
+                    <input id="wishLink" readonly placeholder="保存并生成后显示" />
+                    <button type="button" class="btn" id="btnCopyWish">复制</button>
+                    <button type="button" class="btn" id="btnRegenWish">重新生成</button>
+                  </div>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button class="btn btn-primary" id="btnSaveWish">保存收集页</button>
+                <span class="muted" id="wishHint"></span>
+              </div>
+              </div>
+            </details>
+
+            <div class="card" style="margin-top:12px">
+              <div class="page-head" style="margin:0 0 10px;padding:0">
+                <div><h3 style="margin:0;font-size:15px">收集记录</h3><p style="margin:4px 0 0" id="wishStat">暂无提交</p></div>
+                <button type="button" class="btn" id="btnRefreshWish">刷新</button>
+              </div>
+              <div class="wish-feed" id="wishBody"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" id="page-ratio">
+          <div class="page-inner">
+            <div class="page-head">
+              <div><h2>分享监控</h2><p>按站点魔力公式优选：大体积、少做种、存活久；兼顾 Free 便于下载</p></div>
+              <div>
+                <button class="btn" id="btnRefreshRatio">刷新推荐</button>
+              </div>
+            </div>
+            <details class="cfg-fold">
+              <summary class="cfg-fold-hd">分享监控规则</summary>
+              <div class="cfg-fold-body">
+<div class="form-grid">
+                <div class="form-item"><label>启用分享率辅助</label>
+                  <select id="ratioAssist"><option value="1">开启</option><option value="0">关闭</option></select>
+                </div>
+                <div class="form-item"><label>扫描页数</label><input id="ratioPages" type="number" min="1" max="5" /></div>
+                <div class="form-item"><label>最小体积(GB)</label><input id="ratioMinGb" type="number" step="0.1" /></div>
+                <div class="form-item"><label>最大体积(GB)</label><input id="ratioMaxGb" type="number" /></div>
+                <div class="form-item"><label>最少做种</label><input id="ratioMinSeed" type="number" /></div>
+                <div class="form-item"><label>最多做种</label><input id="ratioMaxSeed" type="number" /></div>
+                <div class="form-item"><label>最少下载中</label><input id="ratioMinLeech" type="number" /></div>
+                <div class="form-item"><label>推荐条数</label><input id="ratioTopN" type="number" /></div>
+                <div class="form-item"><label>偏好 Free/优惠</label>
+                  <select id="ratioPreferFree"><option value="1">是</option><option value="0">否</option></select>
+                </div>
+                <div class="form-item"><label>自动下载推荐</label>
+                  <select id="ratioAutoDl"><option value="0">否</option><option value="1">是</option></select>
+                </div>
+                <div class="form-item"><label>推送至 Transmission</label>
+                  <select id="ratioTrPush"><option value="1">是</option><option value="0">否</option></select>
+                </div>
+                <div class="form-item"><label>分享监控 TR 服务</label><select id="trRatioServer"></select></div>
+                <div class="form-item"><label>定时刷分享</label>
+                  <select id="ratioScheduleEnabled"><option value="0">关闭</option><option value="1">开启</option></select>
+                </div>
+                <div class="form-item"><label>定时时段开始</label><input id="ratioScheduleStart" placeholder="14:00" /></div>
+                <div class="form-item"><label>定时时段结束</label><input id="ratioScheduleEnd" placeholder="18:00" /></div>
+                <div class="form-item full"><label>执行星期</label>
+                  <div class="weekday-picks" id="ratioWeekdays">
+                    <label><input type="checkbox" value="0" checked />一</label>
+                    <label><input type="checkbox" value="1" checked />二</label>
+                    <label><input type="checkbox" value="2" checked />三</label>
+                    <label><input type="checkbox" value="3" checked />四</label>
+                    <label><input type="checkbox" value="4" checked />五</label>
+                    <label><input type="checkbox" value="5" checked />六</label>
+                    <label><input type="checkbox" value="6" checked />日</label>
+                  </div>
+                </div>
+                <div class="form-item full"><label>定时状态</label>
+                  <div class="muted" id="ratioScheduleStatus">尚未配置</div>
+                </div>
+              </div>
+              <div class="note">开启定时后，在选定星期的时段内随机执行一次（拟人延迟+小时配额+静默时段）；同时爱好扫描不再顺带跑分享。</div>
+              <div class="form-actions">
+                <button class="btn btn-primary" id="btnSaveRatio">保存规则</button>
+                <span class="muted" id="ratioHint"></span>
+              </div>
+              </div>
+            </details>
+            <div class="task-list" id="ratioBody"></div>
+          </div>
+        </section>
+
+        <section class="page" id="page-access">
+          <div class="page-inner">
+            <div class="page-head">
+              <div><h2>访问日志</h2><p>系统登录、PT 鉴权、接口访问、自动签到、调度与个人数据同步</p></div>
+              <button class="btn" id="btnRefreshAccess">刷新</button>
+            </div>
+            <div class="log-feed" id="accessLogs"></div>
+            <div class="pager" id="accessPager"></div>
+          </div>
+        </section>
+
+        <section class="page" id="page-ptlog">
+          <div class="page-inner">
+            <div class="page-head">
+              <div><h2>PT日志</h2><p>搜索、匹配、补全详情、分享监控与扫描过程</p></div>
+              <button class="btn" id="btnRefreshPt">刷新</button>
+            </div>
+            <div class="log-feed" id="ptLogs"></div>
+            <div class="pager" id="ptPager"></div>
+          </div>
+        </section>
+
+        <section class="page" id="page-download">
+          <div class="page-inner">
+            <div class="page-head">
+              <div><h2>下载日志</h2><p>种子文件保存与推送至 Transmission 的记录</p></div>
+              <button class="btn" id="btnRefreshDownload">刷新</button>
+            </div>
+            <div class="log-feed" id="downloadLogs"></div>
+            <div class="pager" id="downloadPager"></div>
+          </div>
+        </section>
+
+        <section class="page" id="page-inklog">
+          <div class="page-inner">
+            <div class="page-head">
+              <div><h2>墨水屏日志</h2><p>设备拉取面板与网页预览刷新记录</p></div>
+              <button class="btn" id="btnRefreshInkLog">刷新</button>
+            </div>
+            <div class="log-feed" id="inkLogs"></div>
+            <div class="pager" id="inkPager"></div>
+          </div>
+        </section>
+
+        <section class="page" id="page-sys">
+          <div class="page-inner">
+            <div class="page-head"><div><h2>系统设置</h2><p>密码与墨水屏直连面板 · 版本 <span id="appVersion">-</span></p></div></div>
+            <details class="cfg-fold">
+              <summary class="cfg-fold-hd">墨水屏面板</summary>
+              <div class="cfg-fold-body">
+              <div class="note">设备填下方局域网地址（本机调试用）。预览走当前浏览器地址。刷新间隔写入响应头 wt。</div>
+              <div class="form-grid">
+                <div class="form-item"><label>省市区</label><input id="inkCity" placeholder="四川省成都市郫都区" /></div>
+                <div class="form-item"><label>刷新间隔</label>
+                  <select id="inkWt">
+                    <option value="1005">5 分钟</option>
+                    <option value="0">1 小时</option>
+                    <option value="1">2 小时</option>
+                  </select>
+                </div>
+                <div class="form-item full"><label>设备 API 地址</label>
+                  <div class="wish-link-row">
+                    <input id="inkApiUrl" readonly />
+                    <button type="button" class="btn" id="btnCopyInk">复制</button>
+                    <a class="btn" id="btnPreviewInk" href="/generate-image?istest=1" target="_blank" rel="noreferrer">预览</a>
+                  </div>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button class="btn btn-primary" id="btnSaveInk">保存</button>
+                <span class="muted" id="inkHint"></span>
+              </div>
+              </div>
+            </details>
+            <details class="cfg-fold">
+              <summary class="cfg-fold-hd">登录密码</summary>
+              <div class="cfg-fold-body">
+              <div class="form-grid">
+                <div class="form-item"><label>原密码</label><input id="oldPass" type="password" /></div>
+                <div class="form-item"><label>新密码</label><input id="newPass" type="password" /></div>
+              </div>
+              <div class="form-actions"><button class="btn btn-primary" id="btnChangePass">修改密码</button></div>
+              </div>
+            </details>
+          </div>
+        </section>
+      </main>
+      <nav class="m-tabbar" id="mTabbar" aria-label="移动导航">
+        <button type="button" class="m-tab active" data-mtab="dash">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1v-9.5z"/></svg>
+          <span>首页</span>
+        </button>
+        <button type="button" class="m-tab" data-mtab="tr">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17l6-6 4 4 6-8"/><path d="M4 21h16"/></svg>
+          <span>TR</span>
+        </button>
+        <button type="button" class="m-tab" data-mtab="tasks">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
+          <span>监控</span>
+        </button>
+        <button type="button" class="m-tab" data-mtab="ratio">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5"/></svg>
+          <span>分享</span>
+        </button>
+        <button type="button" class="m-tab" data-mtab="more" id="btnTabMore">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+          <span>更多</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+  <script src="/static/app.js?v=49"></script>
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <title>想看清单</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1a0f0a;
+      --paper: #fff6e8;
+      --red: #d61f26;
+      --red-deep: #9b1218;
+      --gold: #f0c14b;
+      --gold-deep: #c9921a;
+      --teal: #1f8a7a;
+      --ok: #2f9e6b;
+      --err: #c0392b;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+      background: #2a120e;
+      overflow-x: hidden;
+    }
+    .stage {
+      min-height: 100vh;
+      position: relative;
+      display: grid;
+      place-items: center;
+      padding: 28px 16px 40px;
+    }
+    .bg {
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 55% at 50% 0%, rgba(240,193,75,.28), transparent 60%),
+        radial-gradient(circle at 12% 80%, rgba(214,31,38,.35), transparent 42%),
+        radial-gradient(circle at 90% 70%, rgba(31,138,122,.25), transparent 40%),
+        linear-gradient(180deg, #4a1c14 0%, #2a120e 45%, #120806 100%);
+    }
+    .bg::before {
+      content: "";
+      position: absolute; inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,.04) 3px, rgba(0,0,0,.04) 4px),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+      opacity: .35;
+      mix-blend-mode: multiply;
+      pointer-events: none;
+    }
+    .spark {
+      position: absolute; z-index: 0; pointer-events: none;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle, rgba(240,193,75,.55), transparent 70%);
+      filter: blur(2px);
+      animation: pulse 2.8s ease-in-out infinite;
+    }
+    .spark.a { top: 8%; left: 6%; }
+    .spark.b { bottom: 14%; right: 8%; animation-delay: -1.2s; width: 160px; height: 160px; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: .55; }
+      50% { transform: scale(1.25); opacity: .9; }
+    }
+    .poster {
+      position: relative; z-index: 1;
+      width: min(460px, 100%);
+      background: var(--paper);
+      border: 4px solid #1a0f0a;
+      box-shadow:
+        0 0 0 6px var(--gold),
+        0 0 0 10px #1a0f0a,
+        18px 22px 0 rgba(0,0,0,.35);
+      padding: 0;
+      overflow: hidden;
+      animation: slam .55s cubic-bezier(.2,1.4,.4,1) both;
+      transform-origin: 50% 60%;
+    }
+    @keyframes slam {
+      0% { opacity: 0; transform: scale(.72) rotate(-4deg); }
+      70% { transform: scale(1.04) rotate(1deg); }
+      100% { opacity: 1; transform: none; }
+    }
+    .poster-top {
+      background: linear-gradient(180deg, var(--red) 0%, var(--red-deep) 100%);
+      color: #fff;
+      padding: 22px 20px 18px;
+      position: relative;
+      text-align: center;
+      border-bottom: 4px solid #1a0f0a;
+    }
+    .poster-top::after {
+      content: "★ 搞笑功夫 · 想看推荐 ★";
+      display: block;
+      margin-top: 8px;
+      font-size: 12px;
+      letter-spacing: .28em;
+      opacity: .9;
+      font-weight: 700;
+    }
+    .eyebrow {
+      font-family: "ZCOOL KuaiLe", cursive;
+      font-size: 18px;
+      letter-spacing: .12em;
+      margin: 0 0 4px;
+      color: var(--gold);
+      text-shadow: 2px 2px 0 #1a0f0a;
+      animation: bounce 1.8s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+    .brand {
+      margin: 0;
+      font-family: "Ma Shan Zheng", cursive;
+      font-size: clamp(46px, 12vw, 64px);
+      line-height: 1.05;
+      letter-spacing: .04em;
+      text-shadow:
+        3px 3px 0 #1a0f0a,
+        -1px -1px 0 #1a0f0a,
+        0 0 18px rgba(240,193,75,.35);
+    }
+    .stamp {
+      position: absolute;
+      right: 14px; top: 14px;
+      width: 64px; height: 64px;
+      border: 3px solid rgba(240,193,75,.95);
+      color: var(--gold);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: "ZCOOL KuaiLe", cursive;
+      font-size: 15px;
+      line-height: 1.1;
+      text-align: center;
+      transform: rotate(18deg);
+      background: rgba(155,18,24,.35);
+      animation: stampIn .6s .25s cubic-bezier(.2,1.6,.4,1) both;
+    }
+    @keyframes stampIn {
+      from { opacity: 0; transform: rotate(18deg) scale(2.2); }
+      to { opacity: 1; transform: rotate(18deg) scale(1); }
+    }
+    .poster-body {
+      padding: 20px 18px 22px;
+      position: relative;
+    }
+    .lede {
+      margin: 0 0 18px;
+      font-size: 15px;
+      line-height: 1.7;
+      font-weight: 700;
+      color: #3a2418;
+      text-align: center;
+      padding: 10px 12px;
+      background:
+        linear-gradient(90deg, transparent, rgba(240,193,75,.35), transparent);
+      border-top: 2px dashed rgba(26,15,10,.25);
+      border-bottom: 2px dashed rgba(26,15,10,.25);
+    }
+    form { display: grid; gap: 12px; }
+    .field { display: grid; gap: 6px; }
+    label {
+      font-family: "ZCOOL KuaiLe", cursive;
+      font-size: 16px;
+      color: var(--red-deep);
+    }
+    input, textarea {
+      width: 100%;
+      border: 3px solid #1a0f0a;
+      border-radius: 2px;
+      background: #fffdf8;
+      color: var(--ink);
+      padding: 12px 12px;
+      font: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      outline: none;
+      box-shadow: 3px 3px 0 rgba(26,15,10,.15);
+      transition: transform .15s, box-shadow .15s, background .15s;
+    }
+    input:focus, textarea:focus {
+      background: #fff;
+      transform: translate(-1px, -1px);
+      box-shadow: 4px 4px 0 rgba(214,31,38,.25);
+    }
+    textarea { min-height: 92px; resize: vertical; }
+    button {
+      margin-top: 4px;
+      height: 54px;
+      border: 3px solid #1a0f0a;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: "ZCOOL KuaiLe", cursive;
+      font-size: 22px;
+      letter-spacing: .08em;
+      color: #1a0f0a;
+      background: linear-gradient(180deg, var(--gold) 0%, var(--gold-deep) 100%);
+      box-shadow: 0 5px 0 #1a0f0a;
+      transition: transform .12s, box-shadow .12s, filter .12s;
+    }
+    button:hover { filter: brightness(1.05); transform: translateY(-1px); box-shadow: 0 6px 0 #1a0f0a; }
+    button:active { transform: translateY(3px); box-shadow: 0 2px 0 #1a0f0a; }
+    button:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+    .hint {
+      min-height: 22px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #6b4b3a;
+    }
+    .hint.ok { color: var(--ok); }
+    .hint.err { color: var(--err); }
+    .foot {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(26,15,10,.45);
+      letter-spacing: .06em;
+    }
+    .burst {
+      position: absolute;
+      left: -8px; bottom: 70px;
+      font-family: "ZCOOL KuaiLe", cursive;
+      font-size: 13px;
+      color: #fff;
+      background: var(--teal);
+      border: 2px solid #1a0f0a;
+      padding: 6px 10px;
+      transform: rotate(-12deg);
+      box-shadow: 2px 2px 0 #1a0f0a;
+      animation: wiggle 2.4s ease-in-out infinite;
+      z-index: 2;
+    }
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(-12deg); }
+      50% { transform: rotate(-6deg) translateY(-2px); }
+    }
+    .err-box {
+      margin: 24px 18px;
+      border: 3px solid #1a0f0a;
+      background: #ffe8e4;
+      padding: 18px 16px;
+      font-weight: 700;
+      line-height: 1.55;
+      text-align: center;
+      box-shadow: 4px 4px 0 rgba(0,0,0,.2);
+    }
+    @media (max-width: 520px) {
+      .poster { box-shadow: 0 0 0 5px var(--gold), 0 0 0 8px #1a0f0a, 10px 12px 0 rgba(0,0,0,.3); }
+      .burst { display: none; }
+      .stamp { width: 56px; height: 56px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="bg" aria-hidden="true"></div>
+    <div class="spark a" aria-hidden="true"></div>
+    <div class="spark b" aria-hidden="true"></div>
+    <div class="poster" id="panel">
+      <div class="poster-top">
+        <div class="stamp">限时<br>想看</div>
+        <p class="eyebrow">周星驰电影同款喜剧海报</p>
+        <h1 class="brand" id="title">想看清单</h1>
+      </div>
+      <div class="poster-body">
+        <div class="burst">绝世好片？</div>
+        <p class="lede" id="intro">留下片名或关键词，我们会参考收录到监控列表。</p>
+        <form id="form">
+          <div class="field">
+            <label>怎么称呼你</label>
+            <input id="nickname" maxlength="40" placeholder="匿名大侠也行" autocomplete="nickname" />
+          </div>
+          <div class="field">
+            <label>想看的片名 / 关键词</label>
+            <input id="keywords" maxlength="200" placeholder="例：功夫、大话西游、食神" required autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>旁白备注</label>
+            <textarea id="note" maxlength="500" placeholder="版本偏好、补充说明…若有神作务必写明！"></textarea>
+          </div>
+          <button type="submit" id="btn">我要推荐！</button>
+          <div class="hint" id="hint"></div>
+        </form>
+        <div class="foot">一本正经地搞笑 · 提交仅用于兴趣收集</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const token = location.pathname.split("/").filter(Boolean).pop() || "";
+    const $ = (id) => document.getElementById(id);
+    async function boot() {
+      try {
+        const r = await fetch("/api/public/wish/" + encodeURIComponent(token));
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : "链接无效或未开启");
+        $("title").textContent = d.title || "想看清单";
+        $("intro").textContent = d.intro || "";
+        document.title = d.title || "想看清单";
+      } catch (e) {
+        $("panel").innerHTML = '<div class="err-box">' + (e.message || "页面不可用") + "</div>";
+      }
+    }
+    $("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = $("btn");
+      const hint = $("hint");
+      hint.className = "hint";
+      hint.textContent = "正在飞传功力…";
+      btn.disabled = true;
+      try {
+        const r = await fetch("/api/public/wish/" + encodeURIComponent(token), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nickname: $("nickname").value.trim(),
+            keywords: $("keywords").value.trim(),
+            note: $("note").value.trim(),
+          }),
+        });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : "提交失败");
+        hint.className = "hint ok";
+        hint.textContent = "收到！阁下好眼光，改日再战。";
+        $("keywords").value = "";
+        $("note").value = "";
+      } catch (err) {
+        hint.className = "hint err";
+        hint.textContent = err.message || "提交失败";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+    boot();
+  </script>
+</body>
+</html>

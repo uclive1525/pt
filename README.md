@@ -1,6 +1,6 @@
 # 种控台 · PT 站自动化平台
 
-[![Version](https://img.shields.io/badge/version-1.0.4-blue)](VERSION)
+[![Version](https://img.shields.io/badge/version-1.0.5-blue)](VERSION)
 [![Docker](https://img.shields.io/badge/docker-amd64-2496ED?logo=docker&logoColor=white)](Dockerfile)
 [![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)](requirements.txt)
 
@@ -67,7 +67,7 @@
 ./pack.sh
 
 # 2. 导入镜像（群晖 / NAS 上）
-docker load -i dist/mt-pt-1.0.4-amd64.tar.gz
+docker load -i dist/mt-pt-1.0.5-amd64.tar.gz
 
 # 3. 启动
 mkdir -p data downloads

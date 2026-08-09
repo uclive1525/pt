@@ -1,0 +1,16 @@
+services:
+  mt-pt:
+    build: .
+    container_name: mt-pt
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+      - ./downloads:/app/downloads
+      - ./static:/app/static
+      - ./app:/app/app
+    environment:
+      - TZ=Asia/Shanghai
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
