@@ -172,14 +172,10 @@ function goPage(name) {
   }
 }
 
-async function updateInkLink() {
-  let url = `${location.origin}/generate-image`;
-  try {
-    const d = await api("/api/lan");
-    if (d.urls && d.urls[0]) url = d.urls[0];
-  } catch (_) {}
+function updateInkLink() {
+  const url = `${location.origin}/generate-image`;
   if ($("inkApiUrl")) $("inkApiUrl").value = url;
-  if ($("btnPreviewInk")) $("btnPreviewInk").href = `${location.origin}/generate-image?istest=1`;
+  if ($("btnPreviewInk")) $("btnPreviewInk").href = `${url}?istest=1`;
 }
 
 async function loadAppVersion() {

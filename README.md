@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/badge/群晖-Container%20Manager-orange)](docker-compose.synology.yml)
 [![UI](https://img.shields.io/badge/UI-Desktop%20%7C%20Mobile-success)](static/)
 
-
+截图中的 UID、账号、API Key、站点地址等均已打码。
 
 ---
 
