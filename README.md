@@ -47,17 +47,27 @@
 
 手机也能看调度状态、刷 TR、管监控——响应式布局 + 底栏导航，沙发上也能点两下。
 
-<p align="center">
-  <img src="docs/images/mobile-login.png" alt="移动端登录" width="30%" />
-  <img src="docs/images/mobile-dash.png" alt="移动端首页" width="30%" />
-  <img src="docs/images/mobile-tr.png" alt="移动端 TR" width="30%" />
-</p>
-<p align="center"><sub>登录 · 工作台 · Transmission</sub></p>
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <img src="docs/images/mobile-login.png" alt="移动端登录" width="260" /><br/>
+      <sub>登录</sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="docs/images/mobile-dash.png" alt="移动端首页" width="260" /><br/>
+      <sub>工作台</sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="docs/images/mobile-tr.png" alt="移动端 TR" width="260" /><br/>
+      <sub>Transmission</sub>
+    </td>
+  </tr>
+</table>
 
 <p align="center">
-  <img src="docs/images/wish-demo.png" alt="心愿单" width="36%" />
+  <img src="docs/images/wish-demo.png" alt="心愿单" width="240" /><br/>
+  <sub>心愿单收集页（可对外分享）</sub>
 </p>
-<p align="center"><sub>心愿单收集页（可对外分享）</sub></p>
 
 ### 三色墨水屏
 
