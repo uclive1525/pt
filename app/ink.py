@@ -6,7 +6,15 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-from app.store import load_config, load_profile_snapshot, load_tasks
+from app.store import (
+    append_ink_log,
+    load_config,
+    load_ink_device,
+    load_profile_snapshot,
+    load_tasks,
+    save_ink_device,
+    seed_ink_device_from_logs,
+)
 from app.timeutil import now
 
 W, H = 400, 300
@@ -448,6 +456,13 @@ def _resolve_city(city: str):
     return (30.7980, 103.8986, city if ("省" in city or "市" in city or "区" in city) else "四川省成都市郫都区")
 
 
+def _log_official(api: str, msg: str, level: str = "info", **detail):
+    try:
+        append_ink_log(msg, action="official_api", level=level, api=api, **detail)
+    except Exception:
+        pass
+
+
 def _fetch_weather(city: str) -> dict:
     city = (city or "四川省成都市郫都区").strip() or "四川省成都市郫都区"
     now_t = time.time()
@@ -486,8 +501,25 @@ def _fetch_weather(city: str) -> dict:
             ac = (ar.json() or {}).get("current") or {}
             if ac.get("us_aqi") is not None:
                 out["aqi"] = int(ac["us_aqi"])
-    except Exception:
-        pass
+        _log_official(
+            "weather",
+            f"官方请求 weather city={city} temp={out.get('temp')} humidity={out.get('humidity')} aqi={out.get('aqi')}",
+            city=city,
+            lat=lat,
+            lon=lon,
+            temp=out.get("temp"),
+            humidity=out.get("humidity"),
+            aqi=out.get("aqi"),
+            status=200,
+        )
+    except Exception as e:
+        _log_official(
+            "weather",
+            f"官方请求 weather 失败 city={city} {e}",
+            level="warn",
+            city=city,
+            error=str(e),
+        )
     _wx_cache["t"] = now_t
     _wx_cache["city"] = city
     _wx_cache["data"] = out
@@ -512,6 +544,30 @@ def _draw_weather_icon(d, x, y, code, rainy=False):
             fill=BLACK,
             width=2,
         )
+
+
+def _draw_battery_bar(d, x, y, pct):
+    """电池图标进度条（靠左填充，无数字）。≤20% 红，否则黑。"""
+    try:
+        pct = max(0, min(100, int(pct)))
+    except Exception:
+        return 0
+    color = RED if pct <= 20 else BLACK
+    bw, bh = 28, 11
+    tip_w, tip_h = 3, 5
+    d.rectangle((x, y, x + bw - 1, y + bh - 1), outline=color, width=1)
+    ty0 = y + (bh - tip_h) // 2
+    d.rectangle((x + bw - 1, ty0, x + bw - 1 + tip_w, ty0 + tip_h - 1), outline=color, width=1)
+    pad = 2
+    inner_w = bw - 1 - pad * 2
+    fill_w = int(round(inner_w * pct / 100.0))
+    if fill_w > 0:
+        d.rectangle(
+            (x + pad, y + pad, x + pad + max(1, fill_w) - 1, y + bh - 1 - pad),
+            fill=color,
+            outline=color,
+        )
+    return bh
 
 
 def _tr_snapshot() -> dict:
@@ -603,8 +659,34 @@ def _parse_battery(meta: dict):
     return None
 
 
+def _apply_device_battery_cache(meta: dict) -> dict:
+    """设备并非每次上报电量：有则缓存，无则回填最近值。"""
+    meta = dict(meta or {})
+    devid = (meta.get("devid") or "").strip()
+    bat_n = _parse_battery(meta)
+    if bat_n is not None:
+        save_ink_device(
+            devid,
+            battery_pct=bat_n,
+            battery=(meta.get("battery") or str(bat_n)),
+            bv=meta.get("bv") or "",
+            model=meta.get("model") or "",
+            fwv=meta.get("fwv") or "",
+        )
+        meta["battery"] = str(bat_n)
+        return meta
+    seed_ink_device_from_logs()
+    st = load_ink_device(devid)
+    pct = st.get("battery_pct")
+    if pct not in (None, ""):
+        meta["battery"] = str(pct)
+    elif st.get("bv"):
+        meta["bv"] = str(st.get("bv"))
+    return meta
+
+
 def build_panel(meta: dict = None) -> bytes:
-    meta = meta or {}
+    meta = _apply_device_battery_cache(meta)
     cfg = load_config()
     snap = load_profile_snapshot() or {}
     tasks = [x for x in load_tasks() if (x.get("source") or "hobby") == "hobby"]
@@ -649,15 +731,19 @@ def build_panel(meta: dict = None) -> bytes:
     d.line((x1, top_y0 + 4, x1, top_y1 - 2), fill=BLACK, width=1)
     d.line((x2, top_y0 + 4, x2, top_y1 - 2), fill=BLACK, width=1)
 
-    # 中/右两行基线；左：天气图标 + 温湿度空气左对齐
+    # 中/右两行基线；左：天气图标，电池在其下与空气行持平
     f28 = _font(28)
     row1_y, row2_y = 18, 48
     wx1_y, wx2_y, wx3_y = 14, 34, 54
+    bat_n = _parse_battery(meta)
+    icon_h = 28
+    if bat_n is not None:
+        icon_y = wx1_y
+    else:
+        icon_y = wx1_y + ((wx3_y + 14) - wx1_y - icon_h) // 2
     tx = left + 38
     code = wx.get("code")
     rainy = code is not None and int(code) >= 51
-    icon_h = 28
-    icon_y = wx1_y + ((wx3_y + 14) - wx1_y - icon_h) // 2
     _draw_weather_icon(d, left, icon_y, code, rainy=rainy)
     temp = wx.get("temp")
     hum = wx.get("humidity")
@@ -667,6 +753,8 @@ def build_panel(meta: dict = None) -> bytes:
     air_s = f"空气: {aqi}" if aqi is not None else f"时间: {dt.strftime('%H:%M')}"
     air_fill = RED if (aqi is not None and aqi > 100) else BLACK
     _text(img, (tx, wx3_y), air_s, f13, air_fill)
+    if bat_n is not None:
+        _draw_battery_bar(d, left, wx3_y + 2, bat_n)
 
     ym_s = f"{today.year}年{today.month:02d}月"
     day_s = f"{today.day:02d}"
@@ -845,20 +933,104 @@ def build_panel(meta: dict = None) -> bytes:
     return _encode_bmp_demo(img)
 
 
-def fetch_ota(model: str, devid: str) -> tuple:
+def _ota_devid_candidates(devid: str) -> list:
+    """真机 devid 形如 COOIOT_XXXX；缺前缀时补试。"""
+    d = (devid or "").strip()
+    if not d:
+        return [""]
+    out = [d]
+    up = d.upper()
+    if up.startswith("COOIOT_"):
+        norm = "COOIOT_" + d.split("_", 1)[-1]
+        if norm not in out:
+            out.insert(0, norm)
+    else:
+        out.append("COOIOT_" + d)
+    return out
+
+
+def fetch_ota(model: str, devid: str) -> dict:
+    """文档：getOtaInfo?model=&devid=；兼容 Demo 的 devId。成功取 ver/md5，否则默认 fver=1.0.0。"""
+    out = {"ok": False, "fver": "1.0.0", "fmd5": "", "error": "", "miss": False, "model": ""}
+    model = (model or "").strip()
+    devid = (devid or "").strip()
+    # 真机型号为 MSPA3；仅 devid=COOIOT_* 且未带 model 时回退
+    if not model and devid.upper().startswith("COOIOT"):
+        model = "MSPA3"
+    out["model"] = model
     if not model:
-        return "", ""
+        out["miss"] = True
+        out["hint"] = "无model"
+        return out
     try:
+        from urllib.parse import quote
+
         import httpx
 
-        r = httpx.get(
-            "https://funnycoo.cn:4001/getOtaInfo",
-            params={"model": model, "devid": devid or "", "devId": devid or ""},
-            timeout=8.0,
+        last_text = ""
+        last_status = 0
+        last_url = ""
+        for did in _ota_devid_candidates(devid):
+            # 文档参数名 devid
+            url = (
+                "https://funnycoo.cn:4001/getOtaInfo"
+                f"?model={quote(model, safe='')}&devid={quote(did, safe='')}"
+            )
+            r = httpx.get(
+                url,
+                headers={"Accept": "application/json, text/plain, */*"},
+                timeout=8.0,
+            )
+            text = (r.text or "").strip()
+            last_text = text
+            last_status = r.status_code
+            last_url = url
+            data = None
+            if text.startswith("{") or text.startswith("["):
+                try:
+                    data = r.json()
+                except Exception:
+                    data = None
+            ok = bool(
+                isinstance(data, dict)
+                and data.get("success")
+                and isinstance(data.get("data"), dict)
+            )
+            _log_official(
+                "getOtaInfo",
+                f"官方请求 getOtaInfo status={r.status_code} model={model} devid={did}"
+                + (f" ver={data['data'].get('ver')}" if ok else f" body={text[:120]}"),
+                level="info" if ok or r.status_code == 200 else "warn",
+                url=url,
+                status=r.status_code,
+                model=model,
+                devid=did,
+                response=text[:500],
+                ok=ok,
+            )
+            if ok:
+                out["ok"] = True
+                out["fver"] = str(data["data"].get("ver") or "1.0.0")
+                out["fmd5"] = str(data["data"].get("md5") or "")
+                out["devid"] = did
+                return out
+        # 厂商无该型号固件时常 400 Error getOtaInfo —— 按 Demo 静默回退
+        out["miss"] = True
+        out["status"] = last_status
+        out["url"] = last_url
+        if devid and not devid.upper().startswith("COOIOT_"):
+            out["hint"] = "devid应为COOIOT_XXXX"
+        if last_text and "error getotainfo" not in last_text.lower() and "firmware not found" not in last_text.lower():
+            out["error"] = last_text[:200]
+            out["miss"] = False
+    except Exception as e:
+        out["error"] = str(e)
+        _log_official(
+            "getOtaInfo",
+            f"官方请求 getOtaInfo 异常 model={model} devid={devid} {e}",
+            level="warn",
+            model=model,
+            devid=devid,
+            error=str(e),
         )
-        data = r.json()
-        if data.get("success") and isinstance(data.get("data"), dict):
-            return str(data["data"].get("ver") or ""), str(data["data"].get("md5") or "")
-    except Exception:
-        pass
-    return "", ""
+    return out

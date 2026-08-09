@@ -273,7 +273,7 @@ async function loadConfig() {
   set("wishIntro", c.wish_intro || "留下片名或关键词，我们会参考收录到监控列表。");
   updateWishLink(c.wish_token, c.wish_enabled);
   set("inkCity", c.ink_city || "四川省成都市郫都区");
-  if ($("inkWt")) $("inkWt").value = ["1005", "0", "1"].includes(String(c.ink_wt)) ? String(c.ink_wt) : "0";
+  if ($("inkWt")) $("inkWt").value = ["1005", "1010", "0", "1"].includes(String(c.ink_wt)) ? String(c.ink_wt) : "0";
   renderTrServers();
   fillTrSelects();
   return c;
@@ -1027,6 +1027,10 @@ const ACTION_LABEL = {
   pt: "PT",
   ink_refresh: "墨水屏刷新",
   ink: "墨水屏",
+  official_api: "官方请求",
+  ota_upgrade: "OTA升级",
+  ota_query: "OTA升级",
+  device_logs: "设备上报",
   event: "事件",
 };
 
@@ -1063,10 +1067,20 @@ const DETAIL_LABEL = {
   size_text: "体积",
   source: "来源",
   battery: "电量",
+  battery_pct: "电量%",
+  bv: "电压",
   devid: "设备号",
   model: "型号",
-  fwv: "固件",
+  fwv: "设备固件",
   fver: "OTA版本",
+  fmd5: "OTA MD5",
+  headers: "请求头",
+  api: "接口",
+  url: "URL",
+  response: "响应",
+  ok: "成功",
+  hint: "提示",
+  id_key: "ID参数",
   wt: "刷新间隔",
   ip: "IP",
   discount: "优惠",
@@ -1175,11 +1189,16 @@ function renderLogFeed(elId, items, emptyText) {
     const tone = level === "error" ? "err" : level === "warn" ? "warn"
       : action === "checkin" ? "checkin"
       : action === "wish_collect" ? "wish"
+      : action === "official_api" ? "mute"
+      : action === "ota_upgrade" || action === "ota_query" ? "wish"
       : action === "http" ? "mute" : "ok";
     const time = row.ts || "-";
     const hm = time.length >= 19 ? time.slice(11, 19) : time;
     const day = time.length >= 10 ? time.slice(0, 10) : "";
-    const tagCls = action === "checkin" ? "log-tag checkin" : action === "wish_collect" ? "log-tag wish" : "log-tag";
+    const tagCls = action === "checkin" ? "log-tag checkin"
+      : action === "wish_collect" || action === "ota_upgrade" || action === "ota_query" ? "log-tag wish"
+      : action === "official_api" ? "log-tag mute"
+      : "log-tag";
     return `
       <article class="log-item tone-${tone}">
         <div class="log-rail" aria-hidden="true"></div>
@@ -1743,11 +1762,11 @@ if ($("btnSaveInk")) {
         method: "POST",
         body: JSON.stringify({
           ink_city: ($("inkCity").value || "四川省成都市郫都区").trim() || "四川省成都市郫都区",
-          ink_wt: ["1005", "0", "1"].includes(wt) ? wt : "0",
+          ink_wt: ["1005", "1010", "0", "1"].includes(wt) ? wt : "0",
         }),
       });
       if ($("inkHint")) {
-        const label = { "1005": "5 分钟", "0": "1 小时", "1": "2 小时" }[wt] || "1 小时";
+        const label = { "1005": "5 分钟", "1010": "10 分钟", "0": "1 小时", "1": "2 小时" }[wt] || "1 小时";
         $("inkHint").textContent = `已保存 · 刷新 ${label}`;
       }
     } catch (e) {

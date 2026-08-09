@@ -4,7 +4,7 @@
 
 面向馒头等 PT 站点的**自托管**控制台：拟人调度防封、关键词监控下载、分享率辅助刷流，一键推到多台 Transmission；手机可管，群晖可跑，还能直出三色墨水屏。
 
-[![Version](https://img.shields.io/badge/version-1.0.5-blue)](VERSION)
+[![Version](https://img.shields.io/badge/version-1.0.7-blue)](VERSION)
 [![Docker](https://img.shields.io/badge/docker-amd64-2496ED?logo=docker&logoColor=white)](Dockerfile)
 [![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)](requirements.txt)
 [![Platform](https://img.shields.io/badge/群晖-Container%20Manager-orange)](docker-compose.synology.yml)
@@ -93,7 +93,7 @@
 # 得到 dist/mt-pt-<version>-amd64.tar.gz
 
 # 2）上传到群晖并导入
-docker load -i dist/mt-pt-1.0.5-amd64.tar.gz
+docker load -i dist/mt-pt-1.0.7-amd64.tar.gz
 
 # 3）在项目目录启动
 mkdir -p data downloads
@@ -167,7 +167,7 @@ docker compose -f docker-compose.synology.yml up -d
 
 ```bash
 ./pack.sh
-docker load -i dist/mt-pt-1.0.5-amd64.tar.gz
+docker load -i dist/mt-pt-1.0.7-amd64.tar.gz
 mkdir -p data downloads
 docker compose -f docker-compose.synology.yml up -d
 ```

@@ -957,18 +957,35 @@ def _ink_meta(request: Request) -> dict:
                 return str(v).strip()
         for k in keys:
             v = hmap.get(k.lower())
-            if v:
-                return v
+            if v is not None and str(v).strip() != "":
+                return str(v).strip()
         return ""
 
+    # 文档参数：battery / fwv / devid / model；兼容 Demo：x-* 头与 bv/logs
+    battery = pick("battery", "x-battery", "x_battery", "bat", "soc")
+    bv = pick("bv", "x-bv", "x_bv", "batteryvalue", "battery_value", "voltage", "volt")
+    fwv = pick("fwv", "x-fwv", "x_fwv")
+    devid = pick("devid", "x-devid", "x_devid", "dev_id", "deviceid", "device-id", "devId")
+    model = pick("model", "x-model", "x_model")
+    logs = pick("logs", "x-logs", "x_logs")
+    headers = {
+        "battery": battery,
+        "fwv": fwv,
+        "devid": devid,
+        "model": model,
+    }
+    if bv:
+        headers["bv"] = bv
+    if logs:
+        headers["logs"] = logs[:200]
     return {
-        "battery": pick("battery", "bat", "soc", "x-battery"),
-        "bv": pick("bv", "batteryvalue", "voltage", "volt", "x-bv"),
-        "fwv": pick("fwv"),
-        "devid": pick("devid", "dev_id", "deviceid", "device-id"),
-        "model": pick("model"),
-        "logs": pick("logs"),
-        "hdr_keys": ",".join(sorted(hmap.keys())),
+        "battery": battery,
+        "bv": bv,
+        "fwv": fwv,
+        "devid": devid,
+        "model": model,
+        "logs": logs,
+        "headers": headers,
     }
 
 
@@ -978,38 +995,96 @@ def generate_image(request: Request, istest: str = ""):
 
     from PIL import Image
 
-    from app.ink import build_panel, fetch_ota
+    from app.ink import _apply_device_battery_cache, _parse_battery, build_panel, fetch_ota
 
-    meta = _ink_meta(request)
+    meta = _apply_device_battery_cache(_ink_meta(request))
     buf = build_panel(meta)
-    fver, fmd5 = fetch_ota(meta.get("model") or "", meta.get("devid") or "")
     wt = str(load_config().get("ink_wt") or "0").strip()
-    if wt not in ("1005", "0", "1"):
+    # 文档：'0' 1小时 / '1' 2小时 / '1010' 10分钟 / Demo '1005' 5分钟
+    if not wt.isdigit():
         wt = "0"
     src = "preview" if istest else "device"
     bat = (meta.get("battery") or "").strip()
     bv = (meta.get("bv") or "").strip()
     devid = (meta.get("devid") or "").strip()
     model = (meta.get("model") or "").strip()
-    from app.ink import _parse_battery
-
+    fwv = (meta.get("fwv") or "").strip()
+    dlogs = (meta.get("logs") or "").strip()
     bat_n = _parse_battery(meta)
-    bits = [f"墨水屏刷新[{src}]", f"{len(buf)}B"]
+    ip = request.client.host if request.client else ""
+
+    ota = {"ok": False, "fver": "1.0.0", "fmd5": "", "error": "", "miss": True}
+    if not istest:
+        ota = fetch_ota(model, devid)
+        ota_model = (ota.get("model") or model or "").strip()
+        ota_devid = (ota.get("devid") or devid or "").strip()
+        try:
+            if ota.get("ok"):
+                append_ink_log(
+                    f"OTA升级信息 model={ota_model or '-'} devid={ota_devid or '-'} "
+                    f"fwv={fwv or '-'} → fver={ota.get('fver') or '-'} fmd5={ota.get('fmd5') or '-'}",
+                    action="ota_upgrade",
+                    model=ota_model,
+                    devid=ota_devid,
+                    fwv=fwv,
+                    fver=ota.get("fver") or "",
+                    fmd5=ota.get("fmd5") or "",
+                    ip=ip,
+                )
+            else:
+                append_ink_log(
+                    f"OTA升级信息未更新 model={ota_model or '-'} devid={ota_devid or '-'} "
+                    f"{ota.get('error') or ota.get('hint') or '无可用固件'} → fver={ota.get('fver') or '1.0.0'}",
+                    action="ota_upgrade",
+                    level="warn" if (ota.get("error") or ota.get("hint")) else "info",
+                    model=ota_model,
+                    devid=ota_devid,
+                    fwv=fwv,
+                    fver=ota.get("fver") or "1.0.0",
+                    fmd5=ota.get("fmd5") or "",
+                    error=ota.get("error") or "",
+                    hint=ota.get("hint") or "",
+                    ip=ip,
+                )
+        except Exception:
+            pass
+        if dlogs:
+            try:
+                append_ink_log(
+                    f"设备上报 model={model or '-'} devid={devid or '-'} {dlogs[:500]}",
+                    action="device_logs",
+                    model=model,
+                    devid=devid,
+                    fwv=fwv,
+                    logs=dlogs[:2000],
+                    ip=ip,
+                )
+            except Exception:
+                pass
+
+    ota_ok = bool(ota.get("ok"))
+    fver = (ota.get("fver") or "").strip() if ota_ok else ""
+    fmd5 = (ota.get("fmd5") or "").strip() if ota_ok else ""
+
+    headers = meta.get("headers") if isinstance(meta.get("headers"), dict) else {}
+    hdr_txt = "; ".join(f"{k}={v if v != '' else '-'}" for k, v in headers.items())
+    bits = [
+        f"墨水屏刷新[{src}]",
+        f"{len(buf)}B",
+        f"model={model or '-'}",
+        f"devId={devid or '-'}",
+    ]
     if bat_n is not None:
         bits.append(f"电量{bat_n}%")
     elif bv:
         bits.append(f"bv={bv}")
-    else:
-        bits.append("电量未上报")
-    if model:
-        bits.append(f"型号{model}")
-    if devid:
-        bits.append(f"设备{devid}")
+    if fwv:
+        bits.append(f"固件{fwv}")
+    if fver:
+        bits.append(f"OTA{fver}")
     if not istest:
         bits.append(f"wt={wt}")
-    hdr_keys = (meta.get("hdr_keys") or "").strip()
-    if bat_n is None and not istest and hdr_keys:
-        bits.append(f"hdr={hdr_keys}")
+    bits.append(f"headers[{hdr_txt}]")
     try:
         append_ink_log(
             " ".join(bits),
@@ -1020,16 +1095,16 @@ def generate_image(request: Request, istest: str = ""):
             battery_pct=bat_n if bat_n is not None else "",
             model=model,
             devid=devid,
-            fwv=(meta.get("fwv") or "").strip(),
+            fwv=fwv,
             bytes=len(buf),
-            fver=fver or "",
+            fver=fver,
+            fmd5=fmd5,
             wt="" if istest else wt,
-            hdr_keys=hdr_keys,
-            ip=request.client.host if request.client else "",
+            headers=hdr_txt,
+            ip=ip,
         )
     except Exception:
         pass
-    # 网页预览用 PNG 近邻放大，避免浏览器插值 BMP 发糊重影；设备仍取 BMP
     if istest:
         im = Image.open(io.BytesIO(buf)).convert("RGB")
         im = im.resize((im.width * 2, im.height * 2), Image.Resampling.NEAREST)
@@ -1045,13 +1120,11 @@ def generate_image(request: Request, istest: str = ""):
         "Content-Disposition": 'attachment; filename="time-info.bmp"',
         "Content-Type": "image/bmp",
         "Content-Length": str(len(buf)),
-        "wt": wt,
         "Connection": "close",
+        "wt": wt,
+        "fver": ota.get("fver") or "1.0.0",
+        "fmd5": ota.get("fmd5") or "",
     }
-    if fver:
-        headers["fver"] = fver
-    if fmd5:
-        headers["fmd5"] = fmd5
     return Response(content=buf, media_type="image/bmp", headers=headers)
 
 

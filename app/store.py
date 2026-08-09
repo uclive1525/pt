@@ -11,6 +11,7 @@ ACCESS_LOG_FILE = DATA_DIR / "access.log"
 PT_LOG_FILE = DATA_DIR / "pt.log"
 DOWNLOAD_LOG_FILE = DATA_DIR / "download.log"
 INK_LOG_FILE = DATA_DIR / "ink.log"
+INK_DEVICE_FILE = DATA_DIR / "ink_device.json"
 DOWNLOADED_FILE = DATA_DIR / "downloaded.json"
 TASKS_FILE = DATA_DIR / "tasks.json"
 RATIO_FILE = DATA_DIR / "ratio_tips.json"
@@ -313,6 +314,90 @@ def append_download_log(msg: str, action: str = "download", level: str = "info",
 
 def append_ink_log(msg: str, action: str = "ink_refresh", level: str = "info", **detail):
     return _append_event("ink", action, msg, level=level, detail=detail or None)
+
+
+def _ink_device_key(devid: str) -> str:
+    return (devid or "").strip() or "_last"
+
+
+def load_ink_devices() -> dict:
+    ensure_dirs()
+    if not INK_DEVICE_FILE.exists():
+        return {}
+    try:
+        with open(INK_DEVICE_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f) or {}
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def load_ink_device(devid: str = "") -> dict:
+    data = load_ink_devices()
+    key = _ink_device_key(devid)
+    row = data.get(key) if isinstance(data.get(key), dict) else None
+    if row:
+        return row
+    if key != "_last" and isinstance(data.get("_last"), dict):
+        return data["_last"]
+    return {}
+
+
+def save_ink_device(devid: str = "", **fields):
+    from app.timeutil import now_str
+
+    ensure_dirs()
+    data = load_ink_devices()
+    key = _ink_device_key(devid)
+    row = dict(data.get(key) or {}) if isinstance(data.get(key), dict) else {}
+    for k, v in (fields or {}).items():
+        if v is None or v == "":
+            continue
+        row[k] = v
+    row["ts"] = now_str()
+    data[key] = row
+    data["_last"] = dict(row)
+    with _lock:
+        with open(INK_DEVICE_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    return row
+
+
+def seed_ink_device_from_logs():
+    """从墨水屏日志回填最近一次电量到设备缓存。"""
+    if load_ink_device("_last").get("battery_pct") not in (None, ""):
+        return
+    if not INK_LOG_FILE.exists():
+        return
+    try:
+        with open(INK_LOG_FILE, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+    except Exception:
+        return
+    for line in reversed(lines):
+        try:
+            row = json.loads(line)
+        except Exception:
+            continue
+        if not isinstance(row, dict):
+            continue
+        detail = row.get("detail") or {}
+        pct = detail.get("battery_pct")
+        if pct in (None, ""):
+            continue
+        try:
+            pct_n = int(pct)
+        except Exception:
+            continue
+        save_ink_device(
+            detail.get("devid") or "_last",
+            battery_pct=pct_n,
+            battery=detail.get("battery") or str(pct_n),
+            bv=detail.get("bv") or "",
+            model=detail.get("model") or "",
+            fwv=detail.get("fwv") or "",
+        )
+        return
 
 
 def _parse_log_line(line: str) -> dict:
